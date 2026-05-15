@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersistemas — Clima Guarulhos 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-green: #00ff41;
+            --neon-red: #ff003c;
+            --neon-orange: #ff9500;
+            --neon-purple: #bf00ff;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 30, 0.98);
+            --glow-green: 0 0 18px rgba(0,255,65,0.45);
+            --glow-blue: 0 0 18px rgba(0,242,255,0.45);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Fira Code', monospace;
+            background: var(--bg-dark);
+            color: #e5e5e5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,255,65,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,65,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body > * { position: relative; z-index: 1; }
+
+        /* ─── HEADER ─── */
+        .header-main {
+            background: linear-gradient(90deg, rgba(0,255,65,0.08) 0%, transparent 50%, rgba(0,242,255,0.08) 100%);
+            border-bottom: 1px solid rgba(0,255,65,0.25);
+            backdrop-filter: blur(20px);
+        }
+
+        .title-glow {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-green), var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 0 20px rgba(0,242,255,0.4));
+        }
+
+        /* ─── CARDS ─── */
+        .sensor-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(0,255,65,0.25);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.25,0.8,0.25,1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .sensor-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,65,0.05), transparent);
+            transition: left 0.6s;
+        }
+        .sensor-card:hover::before { left: 100%; }
+        .sensor-card:hover {
+            border-color: var(--neon-green);
+            transform: translateY(-6px);
+            box-shadow: var(--glow-green), 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .sensor-badge {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            padding: 0.35rem 0.8rem;
+            background: linear-gradient(45deg, var(--neon-blue), rgba(0,242,255,0.8));
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,242,255,0.3);
+        }
+
+        .value-main {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(3.5rem, 10vw, 6rem);
+            font-weight: 900;
+            line-height: 1;
+            margin: 0.75rem 0;
+            color: var(--neon-blue);
+            filter: drop-shadow(0 0 12px rgba(0,242,255,0.5));
+        }
+
+        /* ─── WEATHER ─── */
+        .weather-icon-wrap {
+            width: 90px; height: 90px;
+            background: rgba(0,242,255,0.08);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid rgba(0,242,255,0.2);
+            margin: 0 auto 1.5rem;
+            font-size: 3.5rem;
+        }
+
+        .weather-detail-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .weather-detail-item {
+            background: rgba(0,255,65,0.06);
+            border: 1px solid rgba(0,255,65,0.15);
+            border-radius: 12px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        /* ─── FORECAST ─── */
+        .forecast-card {
+            background: rgba(0,242,255,0.05);
+            border: 1px solid rgba(0,242,255,0.2);
+            border-radius: 16px;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            transition: all 0.3s;
+            flex: 1;
+        }
+        .forecast-card:hover {
+            border-color: var(--neon-blue);
+            background: rgba(0,242,255,0.1);
+            transform: translateY(-4px);
+        }
+
+        /* ─── CALENDAR ─── */
+        .calendar-section {
+            background: var(--bg-card);
+            border: 2px solid rgba(0,242,255,0.25);
+            border-radius: 24px;
+            padding: 2rem;
+        }
+
+        .cal-month {
+            background: rgba(0,255,65,0.04);
+            border: 1px solid rgba(0,255,65,0.15);
+            border-radius: 16px;
+            padding: 1rem;
+        }
+
+        .cal-month-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--neon-blue);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .cal-header-day {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: rgba(0,255,65,0.5);
+            text-align: center;
+            padding: 2px 0;
+            text-transform: uppercase;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: default;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .cal-day.past {
+            color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .cal-day.future {
+            color: rgba(255,255,255,0.75);
+            background: rgba(0,255,65,0.04);
+        }
+        .cal-day.future:hover {
+            background: rgba(0,255,65,0.1);
+            color: var(--neon-green);
+        }
+
+        .cal-day.today {
+            background: var(--neon-blue) !important;
+            color: #000 !important;
+            font-weight: 900 !important;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(0,242,255,0.8), 0 0 24px rgba(0,242,255,0.4);
+            z-index: 2;
+        }
+
+        .cal-day.weekend { color: rgba(255,149,0,0.6); }
+        .cal-day.weekend.future { color: var(--neon-orange); }
+        .cal-day.empty { background: transparent; }
+
+        /* ─── GITHUB ─── */
+        .github-section {
+            background: var(--bg-card);
+            border: 2px solid rgba(0,255,65,0.2);
+            border-radius: 24px;
+        }
+
+        .logs-table { font-size: 0.85rem; border-collapse: separate; border-spacing: 0; width: 100%; }
+        .logs-table th {
+            background: rgba(0,255,65,0.1);
+            color: var(--neon-green);
+            font-weight: 600;
+            padding: 1rem 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .logs-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-weight: 500;
+        }
+        .logs-table tr:hover { background: rgba(0,255,65,0.05); }
+
+        /* ─── BUTTONS ─── */
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-family: 'Fira Code', monospace;
+            cursor: pointer;
+        }
+        .btn-green { background: rgba(0,255,65,0.12); border-color: var(--neon-green); color: var(--neon-green); }
+        .btn-green:hover { background: var(--neon-green); color: #000; box-shadow: var(--glow-green); transform: translateY(-2px); }
+        .btn-blue { background: rgba(0,242,255,0.12); border-color: var(--neon-blue); color: var(--neon-blue); }
+        .btn-blue:hover { background: var(--neon-blue); color: #000; box-shadow: var(--glow-blue); transform: translateY(-2px); }
+
+        /* ─── PULSE DOT ─── */
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .pulse-dot {
+            width: 14px; height: 14px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            position: relative;
+        }
+        .pulse-dot::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--neon-green);
+            border-radius: 50%;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        /* ─── SECTION TITLES ─── */
+        .sec-title {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0f; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,255,65,0.3); border-radius: 3px; }
+
+        /* ─── LOADING SPINNER ─── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; display: inline-block; }
+
+        /* ─── WEATHER ALERTS ─── */
+        .alert-bar {
+            background: rgba(255,149,0,0.12);
+            border: 1px solid rgba(255,149,0,0.4);
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        /* ─── RESPONSIVE CAL GRID ─── */
+        .cal-year-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body class="py-10 lg:py-16">
+
+    <!-- ═══ HEADER ═══ -->
+    <header class="header-main px-6 lg:px-12 pb-14 lg:pb-20 mb-12">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex justify-center items-center gap-3 mb-4">
+                <div class="pulse-dot"></div>
+                <span class="text-xs text-[var(--neon-green)] uppercase tracking-widest font-semibold">Sistema Ativo</span>
+            </div>
+            <h1 class="title-glow text-4xl lg:text-6xl xl:text-7xl font-black mb-4 tracking-tight">
+                CYBERSISTEMAS
+            </h1>
+            <p class="text-lg lg:text-xl text-[var(--neon-blue)] font-semibold mb-2 tracking-wider">
+                Clima &amp; Calendário — Guarulhos, SP
+            </p>
+            <p class="text-sm opacity-50 tracking-wider">
+                Open-Meteo API • GitHub Sync • Calendário 2026
+            </p>
+            <div class="mt-6 flex flex-wrap justify-center gap-4 text-xs">
+                <span class="px-3 py-1 rounded-full border border-[rgba(0,255,65,0.3)] text-[var(--neon-green)]">🌡️ Clima Tempo Real</span>
+                <span class="px-3 py-1 rounded-full border border-[rgba(0,242,255,0.3)] text-[var(--neon-blue)]">📅 Calendário 2026</span>
+                <span class="px-3 py-1 rounded-full border border-[rgba(255,149,0,0.3)] text-[var(--neon-orange)]">🐙 GitHub Sync</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 lg:px-12 pb-20 space-y-16">
+
+        <!-- ═══ CLIMA ATUAL ═══ -->
+        <section>
+            <h2 class="sec-title text-3xl lg:text-4xl font-bold text-center mb-10">
+                Clima Atual — Guarulhos
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+
+                <!-- TEMPERATURA PRINCIPAL -->
+                <div class="sensor-card lg:col-span-1">
+                    <div class="sensor-badge">TEMP</div>
+                    <div class="weather-icon-wrap" id="weather-icon-main">🌤️</div>
+                    <div class="text-base font-semibold uppercase tracking-wide opacity-70 mb-1">Temperatura</div>
+                    <div class="text-sm opacity-50 mb-2" id="weather-condition-text">Carregando...</div>
+                    <div class="value-main" id="temp-val">--°</div>
+                    <div class="text-sm opacity-60 mt-1" id="feels-like-val">Sensação: --°C</div>
+                    <div class="weather-detail-row">
+                        <div class="weather-detail-item">
+                            <div class="text-xs opacity-50 mb-1">Máx</div>
+                            <div class="text-[var(--neon-orange)] font-bold" id="temp-max">--°</div>
+                        </div>
+                        <div class="weather-detail-item">
+                            <div class="text-xs opacity-50 mb-1">Mín</div>
+                            <div class="text-[var(--neon-blue)] font-bold" id="temp-min">--°</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DETALHES METEOROLÓGICOS -->
+                <div class="sensor-card lg:col-span-2">
+                    <div class="sensor-badge">DETALHES</div>
+                    <div class="text-base font-semibold uppercase tracking-wide opacity-70 mb-6 w-full text-left">
+                        Condições Atmosféricas
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
+                        <div class="weather-detail-item">
+                            <div class="text-2xl mb-1">💧</div>
+                            <div class="text-xs opacity-50 mb-1">Umidade</div>
+                            <div class="text-[var(--neon-blue)] font-bold text-lg" id="humidity-val">--%</div>
+                        </div>
+                        <div class="weather-detail-item">
+                            <div class="text-2xl mb-1">💨</div>
+                            <div class="text-xs opacity-50 mb-1">Vento</div>
+                            <div class="text-[var(--neon-green)] font-bold text-lg" id="wind-val">-- km/h</div>
+                        </div>
+                        <div class="weather-detail-item">
+                            <div class="text-2xl mb-1">🌧️</div>
+                            <div class="text-xs opacity-50 mb-1">Chuva (1h)</div>
+                            <div class="text-[var(--neon-orange)] font-bold text-lg" id="rain-val">-- mm</div>
+                        </div>
+                        <div class="weather-detail-item">
+                            <div class="text-2xl mb-1">☀️</div>
+                            <div class="text-xs opacity-50 mb-1">UV Index</div>
+                            <div class="text-[var(--neon-orange)] font-bold text-lg" id="uv-val">--</div>
+                        </div>
+                        <div class="weather-detail-item">
+                            <div class="text-2xl mb-1">👁️</div>
+                            <div class="text-xs opacity-50 mb-1">Visibilidade</div>
+                            <div class="text-[var(--neon-green)] font-bold text-lg" id="visibility-val">-- km</div>
+                        </div>
+                        <div class="weather-detail-item">
+                            <div class="text-2xl mb-1">🌡️</div>
+                            <div class="text-xs opacity-50 mb-1">Ponto de Orvalho</div>
+                            <div class="text-[var(--neon-blue)] font-bold text-lg" id="dewpoint-val">--°C</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 w-full text-right text-xs opacity-40" id="last-update-weather">Última atualização: --</div>
+                </div>
+            </div>
+
+            <!-- PREVISÃO 7 DIAS -->
+            <div class="sensor-card p-6">
+                <div class="text-base font-semibold uppercase tracking-wide opacity-70 mb-5 w-full text-left">
+                    Previsão 7 dias
+                </div>
+                <div class="flex gap-3 w-full overflow-x-auto pb-2" id="forecast-row">
+                    <!-- preenchido via JS -->
+                    <div class="forecast-card">
+                        <div class="text-xs opacity-50 mb-2">Carregando...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ CALENDÁRIO 2026 ═══ -->
+        <section>
+            <h2 class="sec-title text-3xl lg:text-4xl font-bold text-center mb-4">
+                Calendário 2026
+            </h2>
+            <p class="text-center text-sm opacity-40 mb-10">
+                <span class="inline-block w-3 h-3 rounded-full bg-[var(--neon-blue)] mr-1 align-middle shadow-[0_0_8px_rgba(0,242,255,0.8)]"></span> Hoje
+                &nbsp;
+                <span class="inline-block w-3 h-3 rounded-sm bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.1)] mr-1 align-middle"></span> Passados
+                &nbsp;
+                <span class="inline-block w-3 h-3 rounded-sm bg-[rgba(0,255,65,0.06)] border border-[rgba(0,255,65,0.15)] mr-1 align-middle"></span> Futuros
+            </p>
+
+            <div class="calendar-section">
+                <div class="cal-year-grid" id="calendar-grid">
+                    <!-- preenchido via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ GITHUB ═══ -->
+        <section>
+            <h2 class="sec-title text-3xl lg:text-4xl font-bold text-center mb-10">
+                GitHub Repository
+            </h2>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                <div class="sensor-card p-6 gap-2">
+                    <i data-lucide="star" class="w-10 h-10 text-[var(--neon-orange)] opacity-80"></i>
+                    <div class="text-2xl font-bold text-[var(--neon-orange)]" id="gh-stars">--</div>
+                    <div class="text-xs opacity-50 uppercase tracking-wider">Stars</div>
+                </div>
+                <div class="sensor-card p-6 gap-2">
+                    <i data-lucide="git-fork" class="w-10 h-10 text-[var(--neon-blue)] opacity-80"></i>
+                    <div class="text-2xl font-bold text-[var(--neon-blue)]" id="gh-forks">--</div>
+                    <div class="text-xs opacity-50 uppercase tracking-wider">Forks</div>
+                </div>
+                <div class="sensor-card p-6 gap-2">
+                    <i data-lucide="eye" class="w-10 h-10 text-[var(--neon-green)] opacity-80"></i>
+                    <div class="text-2xl font-bold text-[var(--neon-green)]" id="gh-watchers">--</div>
+                    <div class="text-xs opacity-50 uppercase tracking-wider">Watchers</div>
+                </div>
+                <div class="sensor-card p-6 gap-2">
+                    <i data-lucide="alert-circle" class="w-10 h-10 text-[var(--neon-red)] opacity-80"></i>
+                    <div class="text-2xl font-bold text-[var(--neon-red)]" id="gh-issues">--</div>
+                    <div class="text-xs opacity-50 uppercase tracking-wider">Issues</div>
+                </div>
+            </div>
+
+            <!-- Commits Table -->
+            <div class="github-section p-6 lg:p-10 shadow-2xl">
+                <div class="flex flex-col lg:flex-row justify-between items-center mb-8 gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-10 bg-[var(--neon-orange)] rounded-full"></div>
+                        <span class="text-xl font-bold text-[var(--neon-orange)]">Commits Recentes</span>
+                    </div>
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button onclick="fetchGitHubData()" class="btn-primary btn-blue">
+                            <i data-lucide="refresh-cw" class="inline w-3.5 h-3.5 mr-1.5"></i>Atualizar
+                        </button>
+                        <button onclick="window.open('https://github.com/'+GITHUB_OWNER+'/'+GITHUB_REPO,'_blank')" class="btn-primary btn-green">
+                            <i data-lucide="github" class="inline w-3.5 h-3.5 mr-1.5"></i>Abrir Repo
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="logs-table">
+                        <thead>
+                            <tr>
+                                <th>Autor</th>
+                                <th>Mensagem</th>
+                                <th>Hash</th>
+                                <th>Data</th>
+                                <th class="text-right">Link</th>
+                            </tr>
+                        </thead>
+                        <tbody id="github-logs">
+                            <tr>
+                                <td colspan="5" class="text-center py-16 opacity-50">
+                                    <span class="spin">⏳</span> Sincronizando GitHub...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 text-right text-xs opacity-30" id="gh-last-sync">Última sincronização: --</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ═══ SCRIPTS ═══ -->
+    <script>
+        /* ─── CONFIG ─── */
+        const GITHUB_OWNER = 'GuilhermeSANT29';
+        const GITHUB_REPO  = 'Projeto-Integrador---IoT';
+
+        // Guarulhos, SP — coordenadas
+        const WEATHER_LAT  = -23.4653;
+        const WEATHER_LON  = -46.5332;
+
+        /* ─── INIT ICONS ─── */
+        function initIcons() {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        window.addEventListener('load', initIcons);
+
+        /* ══════════════════════════════════
+           CLIMA — Open-Meteo (gratuito, sem chave)
+        ══════════════════════════════════ */
+        const WMO_CODES = {
+            0: ['☀️','Céu limpo'],       1: ['🌤️','Pouco nublado'],
+            2: ['⛅','Parcialmente nublado'], 3: ['☁️','Nublado'],
+            45: ['🌫️','Neblina'],        48: ['🌫️','Neblina'],
+            51: ['🌦️','Garoa leve'],     53: ['🌦️','Garoa'],
+            55: ['🌧️','Garoa intensa'],  61: ['🌧️','Chuva leve'],
+            63: ['🌧️','Chuva moderada'],65: ['🌧️','Chuva intensa'],
+            71: ['🌨️','Neve leve'],      73: ['🌨️','Neve'],
+            75: ['🌨️','Neve intensa'],   80: ['⛈️','Pancadas de chuva'],
+            81: ['⛈️','Pancadas'],       82: ['⛈️','Pancadas fortes'],
+            95: ['⛈️','Tempestade'],     99: ['⛈️','Tempestade c/ granizo'],
+        };
+
+        function weatherCodeInfo(code) {
+            return WMO_CODES[code] || ['🌡️','Desconhecido'];
+        }
+
+        async function fetchWeather() {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}` +
+                    `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,visibility,dew_point_2m` +
+                    `&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_sum` +
+                    `&timezone=America%2FSao_Paulo&forecast_days=7`;
+
+                const res  = await fetch(url);
+                const data = await res.json();
+
+                const cur = data.current;
+                const [icon, desc] = weatherCodeInfo(cur.weather_code);
+
+                document.getElementById('weather-icon-main').textContent = icon;
+                document.getElementById('weather-condition-text').textContent = desc;
+                document.getElementById('temp-val').textContent = `${Math.round(cur.temperature_2m)}°`;
+                document.getElementById('feels-like-val').textContent = `Sensação: ${Math.round(cur.apparent_temperature)}°C`;
+                document.getElementById('humidity-val').textContent = `${cur.relative_humidity_2m}%`;
+                document.getElementById('wind-val').textContent = `${Math.round(cur.wind_speed_10m)} km/h`;
+                document.getElementById('rain-val').textContent = `${cur.precipitation} mm`;
+                document.getElementById('visibility-val').textContent = `${(cur.visibility/1000).toFixed(1)} km`;
+                document.getElementById('dewpoint-val').textContent = `${Math.round(cur.dew_point_2m)}°C`;
+
+                const daily = data.daily;
+                document.getElementById('temp-max').textContent = `${Math.round(daily.temperature_2m_max[0])}°`;
+                document.getElementById('temp-min').textContent = `${Math.round(daily.temperature_2m_min[0])}°`;
+                document.getElementById('uv-val').textContent = daily.uv_index_max[0] ?? '--';
+
+                const now = new Date();
+                document.getElementById('last-update-weather').textContent =
+                    `Última atualização: ${now.toLocaleTimeString('pt-BR')}`;
+
+                // Previsão 7 dias
+                renderForecast(daily);
+
+            } catch (err) {
+                console.error('Erro clima:', err);
+                document.getElementById('weather-condition-text').textContent = 'Erro ao carregar';
+            }
+        }
+
+        function renderForecast(daily) {
+            const row  = document.getElementById('forecast-row');
+            const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+            row.innerHTML = '';
+
+            for (let i = 0; i < 7; i++) {
+                const date  = new Date(daily.time[i] + 'T12:00:00');
+                const dayName = i === 0 ? 'Hoje' : days[date.getDay()];
+                const [icon] = weatherCodeInfo(daily.weather_code[i]);
+                const max  = Math.round(daily.temperature_2m_max[i]);
+                const min  = Math.round(daily.temperature_2m_min[i]);
+                const rain = daily.precipitation_sum[i];
+
+                const card = document.createElement('div');
+                card.className = 'forecast-card';
+                card.innerHTML = `
+                    <div class="text-xs font-bold text-[var(--neon-blue)] mb-1">${dayName}</div>
+                    <div class="text-xs opacity-40 mb-2">${date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</div>
+                    <div class="text-3xl mb-2">${icon}</div>
+                    <div class="text-[var(--neon-orange)] font-bold text-sm">${max}°</div>
+                    <div class="text-[var(--neon-blue)] font-bold text-sm">${min}°</div>
+                    ${rain > 0 ? `<div class="text-xs opacity-50 mt-1">💧${rain}mm</div>` : ''}
+                `;
+                row.appendChild(card);
+            }
+        }
+
+        /* ══════════════════════════════════
+           CALENDÁRIO 2026
+        ══════════════════════════════════ */
+        const MONTH_NAMES = [
+            'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+            'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
+        ];
+        const DAY_ABBR = ['D','S','T','Q','Q','S','S'];
+
+        function buildCalendar() {
+            const grid  = document.getElementById('calendar-grid');
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            grid.innerHTML = '';
+
+            for (let month = 0; month < 12; month++) {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'cal-month';
+
+                const title = document.createElement('div');
+                title.className = 'cal-month-title';
+                title.textContent = MONTH_NAMES[month];
+                monthDiv.appendChild(title);
+
+                const calGrid = document.createElement('div');
+                calGrid.className = 'cal-grid';
+
+                // Headers
+                DAY_ABBR.forEach((d, i) => {
+                    const h = document.createElement('div');
+                    h.className = 'cal-header-day' + (i === 0 || i === 6 ? ' text-[var(--neon-orange)]' : '');
+                    h.textContent = d;
+                    calGrid.appendChild(h);
+                });
+
+                // First day offset
+                const firstDay = new Date(2026, month, 1).getDay();
+                for (let e = 0; e < firstDay; e++) {
+                    const empty = document.createElement('div');
+                    empty.className = 'cal-day empty';
+                    calGrid.appendChild(empty);
+                }
+
+                const daysInMonth = new Date(2026, month + 1, 0).getDate();
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const d    = new Date(2026, month, day);
+                    d.setHours(0,0,0,0);
+                    const dow  = d.getDay();
+                    const isWe = dow === 0 || dow === 6;
+                    const isToday = d.getTime() === today.getTime();
+                    const isPast  = d < today;
+
+                    const dayDiv = document.createElement('div');
+
+                    if (isToday) {
+                        dayDiv.className = 'cal-day today';
+                    } else if (isPast) {
+                        dayDiv.className = 'cal-day past' + (isWe ? ' weekend' : '');
+                    } else {
+                        dayDiv.className = 'cal-day future' + (isWe ? ' weekend' : '');
+                    }
+
+                    dayDiv.textContent = day;
+                    dayDiv.title = d.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+                    calGrid.appendChild(dayDiv);
+                }
+
+                monthDiv.appendChild(calGrid);
+                grid.appendChild(monthDiv);
+            }
+        }
+
+        /* ══════════════════════════════════
+           GITHUB
+        ══════════════════════════════════ */
+        async function fetchGitHubRepoInfo() {
+            try {
+                const res  = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`);
+                const data = await res.json();
+                document.getElementById('gh-stars').textContent    = data.stargazers_count ?? '0';
+                document.getElementById('gh-forks').textContent    = data.forks_count ?? '0';
+                document.getElementById('gh-watchers').textContent = data.watchers_count ?? '0';
+                document.getElementById('gh-issues').textContent   = data.open_issues_count ?? '0';
+                initIcons();
+            } catch(e) { console.error('GitHub Repo Error:', e); }
+        }
+
+        async function fetchGitHubData() {
+            const tbody = document.getElementById('github-logs');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 opacity-50"><span class="spin">⏳</span> Sincronizando...</td></tr>`;
+            try {
+                const res  = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/commits?per_page=15`);
+                const commits = await res.json();
+                tbody.innerHTML = '';
+
+                if (!Array.isArray(commits)) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-400">
+                        Erro: ${commits.message || 'Repo não encontrado ou privado'}
+                    </td></tr>`;
+                    return;
+                }
+
+                commits.forEach(commit => {
+                    const tr   = document.createElement('tr');
+                    const date = new Date(commit.commit.author.date)
+                        .toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+                    const hash = commit.sha.substring(0, 7);
+                    const msg  = commit.commit.message.split('\n')[0].substring(0, 80);
+                    const author = commit.commit.author.name;
+
+                    tr.innerHTML = `
+                        <td class="font-semibold text-[var(--neon-orange)]">${author}</td>
+                        <td class="opacity-85 max-w-xs truncate" title="${commit.commit.message}">${msg}</td>
+                        <td class="font-mono text-[var(--neon-blue)] cursor-pointer hover:text-white transition-colors"
+                            onclick="window.open('${commit.html_url}','_blank')">${hash}</td>
+                        <td class="opacity-60 text-xs">${date}</td>
+                        <td class="text-right">
+                            <a href="${commit.html_url}" target="_blank"
+                               class="text-[var(--neon-green)] hover:text-white font-bold text-sm transition-colors">Ver →</a>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('gh-last-sync').textContent =
+                    `Última sincronização: ${new Date().toLocaleTimeString('pt-BR')}`;
+
+            } catch(e) {
+                console.error('GitHub Error:', e);
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-red-400">Erro de rede ao buscar commits</td></tr>`;
+            }
+        }
+
+        /* ══════════════════════════════════
+           INICIALIZAÇÃO & TIMERS
+        ══════════════════════════════════ */
+        buildCalendar();
+
+        setTimeout(() => {
+            fetchWeather();
+            fetchGitHubRepoInfo();
+            fetchGitHubData();
+        }, 500);
+
+        // Auto-refresh
+        setInterval(fetchWeather, 10 * 60 * 1000);         // clima: 10 min
+        setInterval(fetchGitHubRepoInfo, 5 * 60 * 1000);   // stats: 5 min
+        setInterval(fetchGitHubData, 10 * 60 * 1000);      // commits: 10 min
+    </script>
+</body>
+</html>
